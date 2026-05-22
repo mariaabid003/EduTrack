@@ -97,8 +97,15 @@ feature/course-api-integration
 
 ### Home
 
-![Home](screenshots/home.png)
+<img width="323" height="735" alt="1" src="https://github.com/user-attachments/assets/4bc8cb7d-02c8-49ea-8ceb-3ba9381c3032" />
+
 
 ### API Screen
 
-![API Screen](screenshots/api_screen.png)
+<img width="347" height="746" alt="2" src="https://github.com/user-attachments/assets/6cd282ed-87e3-4c4d-b79b-e1285e81e4e4" />
+<img width="335" height="730" alt="3" src="https://github.com/user-attachments/assets/6bb10afe-53e2-4a20-bfa9-86a36c8d0d2b" />
+<img width="327" height="746" alt="5" src="https://github.com/user-attachments/assets/6d7e2b28-f539-4ee2-b44e-1c0e3595bf2a" />
+<img width="336" height="733" alt="6" src="https://github.com/user-attachments/assets/1badbdde-1dbc-49d9-ad70-6b101f9ecb3b" />
+
+
+
