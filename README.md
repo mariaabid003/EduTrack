@@ -1,4 +1,4 @@
-# EduTrack — Flutter Multi-Screen App
+# EduTrack
 
 A complete Flutter multi-screen application featuring user authentication, form validation, and navigation.
 
@@ -72,3 +72,33 @@ lib/
 - **Enums** used for `Gender`, `AuthState`, `Subject` — type-safe categorical data
 - **`SharedPreferences`** stores registered users and remember-me session
 - All widgets use named constructors and `const` where possible for performance
+
+---
+
+## API Used
+
+**JSONPlaceholder API**
+
+> <https://jsonplaceholder.typicode.com/>
+
+Used for simulating RESTful course data (fetch, create, update, delete) without a real backend.
+
+## Documentation Followed
+
+> <https://jsonplaceholder.typicode.com/guide/>
+
+## Branch Name
+
+```
+feature/course-api-integration
+```
+
+## Screenshots
+
+### Home
+
+![Home](screenshots/home.png)
+
+### API Screen
+
+![API Screen](screenshots/api_screen.png)

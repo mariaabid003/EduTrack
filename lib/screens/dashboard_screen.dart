@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../controllers/auth_controller.dart';
 import '../enums/app_enums.dart';
 import '../widgets/app_theme.dart';
+import 'courses_screen.dart';
 import 'detail_screen.dart';
 import 'login_screen.dart';
 
@@ -281,6 +282,91 @@ class DashboardScreen extends StatelessWidget {
                       ),
 
                   const SizedBox(height: 24),
+
+                  // ── API Courses Banner ──
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const CoursesScreen(),
+                        ),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF6C63FF), Color(0xFF4A44C6)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF6C63FF).withOpacity(0.35),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(
+                                Icons.api_rounded,
+                                color: Colors.white,
+                                size: 26,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Browse API Courses',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    'CRUD · JSONPlaceholder REST API',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.75),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
 
                   // Stats Row
                   Padding(
