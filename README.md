@@ -106,6 +106,8 @@ feature/course-api-integration
 <img width="335" height="730" alt="3" src="https://github.com/user-attachments/assets/6bb10afe-53e2-4a20-bfa9-86a36c8d0d2b" />
 <img width="327" height="746" alt="5" src="https://github.com/user-attachments/assets/6d7e2b28-f539-4ee2-b44e-1c0e3595bf2a" />
 <img width="336" height="733" alt="6" src="https://github.com/user-attachments/assets/1badbdde-1dbc-49d9-ad70-6b101f9ecb3b" />
+<img width="346" height="742" alt="image" src="https://github.com/user-attachments/assets/a42c157b-b8c6-4f97-b8d1-31e77704e98b" />
+
 
 
 
