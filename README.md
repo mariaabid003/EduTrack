@@ -8,6 +8,11 @@ EduTrack is a Flutter multi-screen course app with authentication, CRUD API inte
 feature/offline-cache-and-state-manangement
 ```
 
+<img width="1917" height="966" alt="Screenshot 2026-06-17 023102" src="https://github.com/user-attachments/assets/f6706139-e3e3-4821-b6fe-c910a0bd6002" />
+<img width="1080" height="2400" alt="Screenshot_20260617_023519" src="https://github.com/user-attachments/assets/55c061e5-bf9b-4f40-a760-19f88297eb57" />
+
+
+
 ## Tools And Packages Used
 
 | Package | Purpose |
