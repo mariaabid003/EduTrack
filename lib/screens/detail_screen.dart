@@ -30,7 +30,7 @@ class DetailScreen extends StatelessWidget {
                       height: 240,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [color, color.withOpacity(0.7)],
+                          colors: [color, color.withValues(alpha: 0.7)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -46,7 +46,7 @@ class DetailScreen extends StatelessWidget {
                               height: 150,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withValues(alpha: 0.1),
                               ),
                             ),
                           ),
@@ -58,7 +58,7 @@ class DetailScreen extends StatelessWidget {
                               height: 180,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.07),
+                                color: Colors.white.withValues(alpha: 0.07),
                               ),
                             ),
                           ),
@@ -83,10 +83,11 @@ class DetailScreen extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 16, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
+                                    color: Colors.white.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.3),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.3),
                                     ),
                                   ),
                                   child: const Text(
@@ -113,7 +114,7 @@ class DetailScreen extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.25),
+                            color: Colors.black.withValues(alpha: 0.25),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -212,7 +213,8 @@ class DetailScreen extends StatelessWidget {
                                 (line) => Padding(
                                   padding: const EdgeInsets.only(bottom: 8),
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Icon(
                                         line.toLowerCase().contains('lab')
@@ -255,10 +257,8 @@ class DetailScreen extends StatelessWidget {
                             _InfoChip(
                                 label: 'Semester: Fall 2024', color: color),
                             _InfoChip(label: '3 Credit Hours', color: color),
-                            _InfoChip(
-                                label: 'Undergraduate', color: color),
-                            _InfoChip(
-                                label: 'Mandatory Course', color: color),
+                            _InfoChip(label: 'Undergraduate', color: color),
+                            _InfoChip(label: 'Mandatory Course', color: color),
                           ],
                         ),
                       ),
@@ -308,10 +308,10 @@ class DetailScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
+        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withOpacity(0.05),
+            color: AppTheme.primary.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -325,7 +325,7 @@ class DetailScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 18),
@@ -362,9 +362,9 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         label,

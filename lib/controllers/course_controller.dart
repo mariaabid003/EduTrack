@@ -3,11 +3,11 @@
 // STATE MANAGEMENT (Provider / ChangeNotifier).
 //
 // Holds ONLY UI state and orchestrates calls to the repository. It contains
-// no networking and no persistence logic — that lives in the service and
+// no networking and no persistence logic -- that lives in the service and
 // local-storage layers behind the repository. This keeps UI logic cleanly
 // separated from business logic.
 //
-//   UI  →  CourseController (this)  →  CourseRepository  →  API / LocalDB
+//   UI  ->  CourseController (this)  ->  CourseRepository  ->  API / LocalDB
 //
 // Manages five UI states: loading, success, empty, failure, plus an
 // `isOffline` flag for when data is served from the on-device cache.
@@ -22,7 +22,7 @@ class CourseController extends ChangeNotifier {
 
   CourseController(this._repository);
 
-  // ─── State ───
+  // State
   List<CourseModel> _courses = [];
   CourseState _state = CourseState.idle;
   String? _errorMessage;
@@ -30,11 +30,11 @@ class CourseController extends ChangeNotifier {
   bool _isOffline = false;
   DateTime? _lastSyncedAt;
 
-  // ─── Getters ───
+  // Getters
   /// Full list (unfiltered). UI normally reads [courses] (filtered).
   List<CourseModel> get allCourses => List.unmodifiable(_courses);
 
-  /// The list the UI renders — respects the active search query.
+  /// The list the UI renders -- respects the active search query.
   List<CourseModel> get courses {
     if (_searchQuery.isEmpty) return List.unmodifiable(_courses);
     final q = _searchQuery.toLowerCase();
@@ -60,7 +60,7 @@ class CourseController extends ChangeNotifier {
   bool get isSearchEmpty =>
       _searchQuery.isNotEmpty && courses.isEmpty && _courses.isNotEmpty;
 
-  // ─────────────────── SEARCH / FILTER ───────────────────
+  // SEARCH / FILTER
 
   void search(String query) {
     _searchQuery = query.trim();
@@ -73,7 +73,7 @@ class CourseController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─────────────────── READ (offline-first) ───────────────────
+  // READ (offline-first)
 
   /// Loads courses via the repository. Network is preferred; on failure the
   /// repository falls back to cached data and we flag the session offline.
@@ -94,7 +94,7 @@ class CourseController extends ChangeNotifier {
     }
   }
 
-  // ─────────────────── CREATE ───────────────────
+  // CREATE
 
   Future<bool> addCourse({
     required String title,
@@ -114,7 +114,7 @@ class CourseController extends ChangeNotifier {
     }
   }
 
-  // ─────────────────── UPDATE (optimistic) ───────────────────
+  // UPDATE (optimistic)
 
   /// Optimistically replaces the item in the list, then calls the API.
   /// Rolls back to the previous value if the request fails.
@@ -123,7 +123,7 @@ class CourseController extends ChangeNotifier {
     if (idx == -1) return false;
 
     final previous = _courses[idx];
-    // Optimistic update — UI reflects the change immediately.
+    // Optimistic update -- UI reflects the change immediately.
     _courses[idx] = course;
     notifyListeners();
 
@@ -141,7 +141,7 @@ class CourseController extends ChangeNotifier {
     }
   }
 
-  // ─────────────────── DELETE (optimistic) ───────────────────
+  // DELETE (optimistic)
 
   /// Optimistically removes the item then calls the API. Rolls back on error.
   Future<bool> deleteCourse(int id) async {
@@ -164,7 +164,7 @@ class CourseController extends ChangeNotifier {
     }
   }
 
-  // ─────────────────── HELPERS ───────────────────
+  // HELPERS
 
   void clearError() {
     _errorMessage = null;

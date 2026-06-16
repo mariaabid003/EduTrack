@@ -98,8 +98,7 @@ class CourseService {
 
   void _assertSuccess(http.Response response, String message) {
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw CourseServiceException(
-          '$message (status ${response.statusCode})');
+      throw CourseServiceException('$message (status ${response.statusCode})');
     }
   }
 }

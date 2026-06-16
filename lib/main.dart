@@ -19,7 +19,7 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   final localStorage = CourseLocalStorage(prefs);
 
-  // Assemble the dependency chain: API + LocalDB → Repository.
+  // Assemble the dependency chain: API + LocalDB -> Repository.
   final courseRepository = CourseRepository(
     api: CourseService(),
     local: localStorage,

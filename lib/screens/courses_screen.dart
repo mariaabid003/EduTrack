@@ -1,7 +1,7 @@
 // lib/screens/courses_screen.dart
 //
-// Main CRUD hub — lists courses from JSONPlaceholder with
-// create, edit, and delete operations.
+// Main CRUD hub -- lists courses with create, edit, delete, search,
+// pull-to-refresh, offline cache banner, and empty states.
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +23,6 @@ class _CoursesScreenState extends State<CoursesScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch courses after first frame so the provider is available.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CourseController>().loadCourses();
     });
@@ -65,10 +64,8 @@ class _CoursesScreenState extends State<CoursesScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Delete Course',
-          style: TextStyle(
-            color: AppTheme.textDark,
-            fontWeight: FontWeight.w800,
-          ),
+          style:
+              TextStyle(color: AppTheme.textDark, fontWeight: FontWeight.w800),
         ),
         content: RichText(
           text: TextSpan(
@@ -118,8 +115,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     }
   }
 
-  void _showSnackbar(
-      BuildContext ctx, String msg, Color color, IconData icon) {
+  void _showSnackbar(BuildContext ctx, String msg, Color color, IconData icon) {
     ScaffoldMessenger.of(ctx).showSnackBar(
       SnackBar(
         content: Row(
@@ -144,7 +140,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header ──
+            // Header
             Container(
               width: double.infinity,
               decoration: const BoxDecoration(
@@ -160,7 +156,6 @@ class _CoursesScreenState extends State<CoursesScreen> {
               ),
               child: Stack(
                 children: [
-                  // Decorative circles
                   Positioned(
                     right: -20,
                     top: -20,
@@ -169,7 +164,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                       height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                       ),
                     ),
                   ),
@@ -181,7 +176,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                       height: 140,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                       ),
                     ),
                   ),
@@ -189,13 +184,12 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
                     child: Row(
                       children: [
-                        // Back button
                         GestureDetector(
                           onTap: () => Navigator.of(context).pop(),
                           child: Container(
                             padding: const EdgeInsets.all(9),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(
@@ -222,14 +216,13 @@ class _CoursesScreenState extends State<CoursesScreen> {
                               Text(
                                 'Powered by JSONPlaceholder REST API',
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.75),
+                                  color: Colors.white.withValues(alpha: 0.75),
                                   fontSize: 12,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        // Add button
                         GestureDetector(
                           onTap: _openAddForm,
                           child: Container(
@@ -239,7 +232,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                               borderRadius: BorderRadius.circular(14),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.15),
+                                  color: Colors.black.withValues(alpha: 0.15),
                                   blurRadius: 8,
                                   offset: const Offset(0, 3),
                                 ),
@@ -259,44 +252,45 @@ class _CoursesScreenState extends State<CoursesScreen> {
               ),
             ),
 
-            // ── Search bar ──
+            // Search bar
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
               child: TextField(
                 controller: _searchController,
                 onChanged: (v) {
                   context.read<CourseController>().search(v);
-                  setState(() {}); // refresh clear-icon visibility
                 },
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: 'Search courses by title or description...',
                   prefixIcon: const Icon(Icons.search_rounded,
                       color: AppTheme.textMedium),
-                  suffixIcon: _searchController.text.isEmpty
-                      ? null
-                      : IconButton(
-                          icon: const Icon(Icons.close_rounded,
-                              color: AppTheme.textMedium),
-                          onPressed: () {
-                            _searchController.clear();
-                            context.read<CourseController>().clearSearch();
-                            FocusScope.of(context).unfocus();
-                          },
-                        ),
+                  suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _searchController,
+                    builder: (context, value, _) {
+                      if (value.text.isEmpty) return const SizedBox.shrink();
+                      return IconButton(
+                        icon: const Icon(Icons.close_rounded,
+                            color: AppTheme.textMedium),
+                        onPressed: () {
+                          _searchController.clear();
+                          context.read<CourseController>().clearSearch();
+                          FocusScope.of(context).unfocus();
+                        },
+                      );
+                    },
+                  ),
                   filled: true,
                   fillColor: Colors.white,
                   contentPadding:
                       const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide:
-                        const BorderSide(color: AppTheme.divider),
+                    borderSide: const BorderSide(color: AppTheme.divider),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
-                    borderSide:
-                        const BorderSide(color: AppTheme.divider),
+                    borderSide: const BorderSide(color: AppTheme.divider),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -307,23 +301,23 @@ class _CoursesScreenState extends State<CoursesScreen> {
               ),
             ),
 
-            // ── Offline / cached-data banner ──
+            // Offline / cached-data banner
             Consumer<CourseController>(
               builder: (context, controller, _) {
                 if (!controller.isOffline) return const SizedBox.shrink();
                 final synced = controller.lastSyncedAt;
                 final hint = synced == null
                     ? 'Showing saved data'
-                    : 'Offline · showing data saved ${_timeAgo(synced)}';
+                    : 'Offline - showing data saved ${_timeAgo(synced)}';
                 return Container(
                   margin: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppTheme.warning.withOpacity(0.12),
+                    color: AppTheme.warning.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
-                    border:
-                        Border.all(color: AppTheme.warning.withOpacity(0.4)),
+                    border: Border.all(
+                        color: AppTheme.warning.withValues(alpha: 0.4)),
                   ),
                   child: Row(
                     children: [
@@ -346,11 +340,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
               },
             ),
 
-            // ── Body ──
+            // Body
             Expanded(
               child: Consumer<CourseController>(
                 builder: (context, controller, _) {
-                  // ── Loading state ──
+                  // Loading state
                   if (controller.state == CourseState.loading &&
                       controller.courses.isEmpty) {
                     return const Center(
@@ -362,16 +356,14 @@ class _CoursesScreenState extends State<CoursesScreen> {
                           Text(
                             'Fetching courses from API...',
                             style: TextStyle(
-                              color: AppTheme.textMedium,
-                              fontSize: 14,
-                            ),
+                                color: AppTheme.textMedium, fontSize: 14),
                           ),
                         ],
                       ),
                     );
                   }
 
-                  // ── Error state ──
+                  // Error state
                   if (controller.state == CourseState.failure &&
                       controller.courses.isEmpty) {
                     return Center(
@@ -383,14 +375,11 @@ class _CoursesScreenState extends State<CoursesScreen> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: AppTheme.error.withOpacity(0.1),
+                                color: AppTheme.error.withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
-                                Icons.wifi_off_rounded,
-                                color: AppTheme.error,
-                                size: 40,
-                              ),
+                              child: const Icon(Icons.wifi_off_rounded,
+                                  color: AppTheme.error, size: 40),
                             ),
                             const SizedBox(height: 20),
                             const Text(
@@ -403,8 +392,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              controller.errorMessage ??
-                                  'An error occurred.',
+                              controller.errorMessage ?? 'An error occurred.',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 color: AppTheme.textMedium,
@@ -415,8 +403,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                             const SizedBox(height: 24),
                             ElevatedButton.icon(
                               onPressed: _refresh,
-                              icon: const Icon(Icons.refresh_rounded,
-                                  size: 18),
+                              icon: const Icon(Icons.refresh_rounded, size: 18),
                               label: const Text('Retry'),
                               style: ElevatedButton.styleFrom(
                                 minimumSize: const Size(160, 48),
@@ -428,7 +415,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     );
                   }
 
-                  // ── Empty state (loaded, but no courses at all) ──
+                  // Empty state (loaded, but no courses at all)
                   if (controller.state == CourseState.empty) {
                     return RefreshIndicator(
                       onRefresh: _refresh,
@@ -436,8 +423,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                       child: ListView(
                         children: [
                           SizedBox(
-                            height:
-                                MediaQuery.of(context).size.height * 0.55,
+                            height: MediaQuery.of(context).size.height * 0.55,
                             child: _EmptyState(
                               icon: Icons.inbox_rounded,
                               title: 'No courses yet',
@@ -453,7 +439,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     );
                   }
 
-                  // ── Search returned no matches ──
+                  // Search returned no matches
                   if (controller.isSearchEmpty) {
                     return ListView(
                       children: [
@@ -471,25 +457,23 @@ class _CoursesScreenState extends State<CoursesScreen> {
                     );
                   }
 
-                  // ── Success / List state ──
+                  // Success / List state
                   return RefreshIndicator(
                     onRefresh: _refresh,
                     color: AppTheme.primary,
                     child: CustomScrollView(
                       slivers: [
-                        // Stats bar
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
                             child: Row(
                               children: [
                                 _StatPill(
-                                  label:
-                                      '${controller.courses.length} courses',
+                                  label: '${controller.courses.length} courses',
                                   icon: Icons.library_books_rounded,
                                 ),
                                 const SizedBox(width: 10),
-                                _StatPill(
+                                const _StatPill(
                                   label: 'GET /posts',
                                   icon: Icons.cloud_done_rounded,
                                   color: AppTheme.success,
@@ -512,15 +496,14 @@ class _CoursesScreenState extends State<CoursesScreen> {
                             ),
                           ),
                         ),
-
-                        // Course list
                         SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
                               final course = controller.courses[index];
                               return TweenAnimationBuilder<double>(
                                 duration: Duration(
-                                    milliseconds: 300 + (index * 40).clamp(0, 600)),
+                                    milliseconds:
+                                        300 + (index * 40).clamp(0, 600)),
                                 tween: Tween(begin: 0.0, end: 1.0),
                                 curve: Curves.easeOutCubic,
                                 builder: (ctx, val, child) => Opacity(
@@ -551,24 +534,20 @@ class _CoursesScreenState extends State<CoursesScreen> {
           ],
         ),
       ),
-
-      // FAB: add course
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openAddForm,
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'Add Course',
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
+        label: const Text('Add Course',
+            style: TextStyle(fontWeight: FontWeight.w700)),
         elevation: 4,
       ),
     );
   }
 }
 
-// ── Course Card ──────────────────────────────────────────────────────────────
+// Course Card
 
 class _CourseCard extends StatelessWidget {
   final CourseModel course;
@@ -583,7 +562,6 @@ class _CourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Pick a consistent accent colour per course based on id.
     final accentColors = [
       const Color(0xFF6C63FF),
       const Color(0xFF2EC4B6),
@@ -604,7 +582,7 @@ class _CourseCard extends StatelessWidget {
           border: Border.all(color: AppTheme.divider, width: 1),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primary.withOpacity(0.05),
+              color: AppTheme.primary.withValues(alpha: 0.05),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -612,7 +590,6 @@ class _CourseCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Left colour bar
             Positioned(
               left: 0,
               top: 0,
@@ -628,7 +605,6 @@ class _CourseCard extends StatelessWidget {
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 14, 14, 14),
               child: Column(
@@ -637,12 +613,11 @@ class _CourseCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ID badge
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.12),
+                          color: color.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -655,12 +630,11 @@ class _CourseCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // userId badge
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppTheme.textLight.withOpacity(0.15),
+                          color: AppTheme.textLight.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -673,7 +647,6 @@ class _CourseCard extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      // Edit & Delete actions
                       _ActionIcon(
                         icon: Icons.edit_outlined,
                         color: const Color(0xFF6C63FF),
@@ -690,7 +663,6 @@ class _CourseCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // Title
                   Text(
                     course.title,
                     style: const TextStyle(
@@ -703,7 +675,6 @@ class _CourseCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
-                  // Description
                   Text(
                     course.body,
                     style: const TextStyle(
@@ -715,17 +686,16 @@ class _CourseCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 10),
-                  // Bottom divider + API method label
                   Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 7, vertical: 3),
                         decoration: BoxDecoration(
-                          color: AppTheme.success.withOpacity(0.1),
+                          color: AppTheme.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                              color: AppTheme.success.withOpacity(0.3)),
+                              color: AppTheme.success.withValues(alpha: 0.3)),
                         ),
                         child: const Text(
                           'GET',
@@ -780,7 +750,7 @@ class _ActionIcon extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color, size: 17),
@@ -806,9 +776,9 @@ class _StatPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -829,7 +799,7 @@ class _StatPill extends StatelessWidget {
   }
 }
 
-// ── Empty / no-results state ─────────────────────────────────────────────────
+// Empty / no-results state
 
 class _EmptyState extends StatelessWidget {
   final IconData icon;
@@ -857,7 +827,7 @@ class _EmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.08),
+                color: AppTheme.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: AppTheme.primary, size: 40),

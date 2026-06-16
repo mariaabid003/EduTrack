@@ -55,8 +55,7 @@ class CourseModel {
   }
 
   @override
-  String toString() =>
-      'CourseModel(id: $id, userId: $userId, title: $title)';
+  String toString() => 'CourseModel(id: $id, userId: $userId, title: $title)';
 }
 
 /// Possible states for any course-related async operation.

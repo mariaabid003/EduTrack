@@ -1,6 +1,6 @@
 // lib/data/course_local_storage.dart
 //
-// LOCAL DATA SOURCE — pure persistence, no networking, no Flutter UI.
+// LOCAL DATA SOURCE -- pure persistence, no networking, no Flutter UI.
 // Caches the course list on-device using SharedPreferences so the app
 // can render content while offline. Also records when the cache was last
 // synced with the API so the UI can show a "last updated" hint.
@@ -12,6 +12,8 @@ import '../models/course_model.dart';
 class CourseLocalStorage {
   static const String _coursesKey = 'cached_courses_v1';
   static const String _syncedAtKey = 'cached_courses_synced_at_v1';
+  static const String _changedIdsKey = 'cached_courses_changed_ids_v1';
+  static const String _deletedIdsKey = 'cached_courses_deleted_ids_v1';
 
   final SharedPreferences _prefs;
 
@@ -23,19 +25,16 @@ class CourseLocalStorage {
     return CourseLocalStorage(prefs);
   }
 
-  // ─────────────────── WRITE ───────────────────
+  // WRITE
 
   /// Persists the full course list as a JSON string and stamps the sync time.
   Future<void> saveCourses(List<CourseModel> courses) async {
     final jsonList = courses.map((c) => c.toJson()).toList();
     await _prefs.setString(_coursesKey, jsonEncode(jsonList));
-    await _prefs.setString(
-      _syncedAtKey,
-      DateTime.now().toIso8601String(),
-    );
+    await _prefs.setString(_syncedAtKey, DateTime.now().toIso8601String());
   }
 
-  // ─────────────────── READ ───────────────────
+  // READ
 
   /// Returns the cached courses, or an empty list if nothing is stored yet.
   List<CourseModel> loadCourses() {
@@ -48,7 +47,7 @@ class CourseLocalStorage {
           .map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (_) {
-      // Corrupted cache — treat as empty rather than crashing.
+      // Corrupted cache -- treat as empty rather than crashing.
       return [];
     }
   }
@@ -66,10 +65,45 @@ class CourseLocalStorage {
     return DateTime.tryParse(raw);
   }
 
-  // ─────────────────── CLEAR ───────────────────
+  /// IDs that were created or edited locally after being accepted by the API.
+  Set<int> loadChangedIds() => _loadIdSet(_changedIdsKey);
+
+  /// IDs deleted locally after the API accepted the delete request.
+  Set<int> loadDeletedIds() => _loadIdSet(_deletedIdsKey);
+
+  Future<void> markChanged(int id) async {
+    final ids = loadChangedIds()..add(id);
+    await _saveIdSet(_changedIdsKey, ids);
+  }
+
+  Future<void> clearChanged(int id) async {
+    final ids = loadChangedIds()..remove(id);
+    await _saveIdSet(_changedIdsKey, ids);
+  }
+
+  Future<void> markDeleted(int id) async {
+    final deletedIds = loadDeletedIds()..add(id);
+    final changedIds = loadChangedIds()..remove(id);
+    await _saveIdSet(_deletedIdsKey, deletedIds);
+    await _saveIdSet(_changedIdsKey, changedIds);
+  }
+
+  // CLEAR
 
   Future<void> clear() async {
     await _prefs.remove(_coursesKey);
     await _prefs.remove(_syncedAtKey);
+    await _prefs.remove(_changedIdsKey);
+    await _prefs.remove(_deletedIdsKey);
+  }
+
+  Set<int> _loadIdSet(String key) {
+    final raw = _prefs.getStringList(key) ?? const <String>[];
+    return raw.map(int.tryParse).whereType<int>().toSet();
+  }
+
+  Future<void> _saveIdSet(String key, Set<int> ids) {
+    final values = ids.map((id) => id.toString()).toList()..sort();
+    return _prefs.setStringList(key, values);
   }
 }

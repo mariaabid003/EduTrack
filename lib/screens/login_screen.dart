@@ -152,15 +152,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 20),
 
                             // Divider
-                            Row(
+                            const Row(
                               children: [
                                 Expanded(
                                     child: Divider(
-                                        color: AppTheme.divider,
-                                        thickness: 1)),
+                                        color: AppTheme.divider, thickness: 1)),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
+                                  padding: EdgeInsets.symmetric(horizontal: 16),
                                   child: Text(
                                     'OR',
                                     style: TextStyle(
@@ -172,8 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 Expanded(
                                     child: Divider(
-                                        color: AppTheme.divider,
-                                        thickness: 1)),
+                                        color: AppTheme.divider, thickness: 1)),
                               ],
                             ),
 
@@ -184,8 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () =>
                                   Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        const RegistrationScreen()),
+                                    builder: (_) => const RegistrationScreen()),
                               ),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size(double.infinity, 54),

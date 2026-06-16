@@ -23,7 +23,7 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleCtrl;
   late final TextEditingController _bodyCtrl;
-  bool _isSubmitting = false;
+  final ValueNotifier<bool> _isSubmitting = ValueNotifier<bool>(false);
 
   bool get _isEditMode => widget.course != null;
 
@@ -38,13 +38,14 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
   void dispose() {
     _titleCtrl.dispose();
     _bodyCtrl.dispose();
+    _isSubmitting.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSubmitting = true);
+    _isSubmitting.value = true;
     final controller = context.read<CourseController>();
     bool success;
 
@@ -62,7 +63,7 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
     }
 
     if (!mounted) return;
-    setState(() => _isSubmitting = false);
+    _isSubmitting.value = false;
 
     if (success) {
       _showSuccess();
@@ -87,8 +88,7 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
         ),
         backgroundColor: AppTheme.success,
         behavior: SnackBarBehavior.floating,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
       ),
     );
@@ -107,8 +107,7 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
         ),
         backgroundColor: AppTheme.error,
         behavior: SnackBarBehavior.floating,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
       ),
     );
@@ -152,7 +151,7 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                             height: 110,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.08),
+                              color: Colors.white.withValues(alpha: 0.08),
                             ),
                           ),
                         ),
@@ -164,13 +163,12 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                             height: 130,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.05),
+                              color: Colors.white.withValues(alpha: 0.05),
                             ),
                           ),
                         ),
                         Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
                           child: Row(
                             children: [
                               GestureDetector(
@@ -178,7 +176,7 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                                 child: Container(
                                   padding: const EdgeInsets.all(9),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
+                                    color: Colors.white.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: const Icon(
@@ -190,8 +188,7 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                               ),
                               const SizedBox(width: 16),
                               Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     _isEditMode
@@ -211,7 +208,7 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                                         : 'Fill in the details below',
                                     style: TextStyle(
                                       color:
-                                          Colors.white.withOpacity(0.75),
+                                          Colors.white.withValues(alpha: 0.75),
                                       fontSize: 13,
                                     ),
                                   ),
@@ -235,11 +232,11 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withOpacity(0.08),
+                              color: AppTheme.primary.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                   color:
-                                      AppTheme.primary.withOpacity(0.2)),
+                                      AppTheme.primary.withValues(alpha: 0.2)),
                             ),
                             child: Row(
                               children: [
@@ -247,16 +244,14 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
                                     color: AppTheme.primary,
-                                    borderRadius:
-                                        BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: const Icon(Icons.tag_rounded,
                                       color: Colors.white, size: 16),
                                 ),
                                 const SizedBox(width: 12),
                                 Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
                                       'Course ID',
@@ -283,15 +278,16 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                         ],
 
                         // Title field
-                        _FieldLabel(label: 'Course Title', icon: Icons.title_rounded),
+                        const _FieldLabel(
+                            label: 'Course Title', icon: Icons.title_rounded),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _titleCtrl,
                           textCapitalization: TextCapitalization.words,
                           maxLength: 120,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'e.g. Introduction to Flutter',
-                            prefixIcon: const Icon(Icons.book_outlined,
+                            prefixIcon: Icon(Icons.book_outlined,
                                 color: AppTheme.primary, size: 20),
                             counterText: '',
                           ),
@@ -308,7 +304,7 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                         const SizedBox(height: 24),
 
                         // Description field
-                        _FieldLabel(
+                        const _FieldLabel(
                             label: 'Course Description',
                             icon: Icons.description_outlined),
                         const SizedBox(height: 8),
@@ -342,10 +338,10 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                         Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.07),
+                            color: Colors.blue.withValues(alpha: 0.07),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                                color: Colors.blue.withOpacity(0.2)),
+                                color: Colors.blue.withValues(alpha: 0.2)),
                           ),
                           child: Row(
                             children: [
@@ -370,48 +366,60 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
                         const SizedBox(height: 28),
 
                         // Submit button
-                        ElevatedButton.icon(
-                          onPressed: _isSubmitting ? null : _submit,
-                          icon: _isSubmitting
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Icon(
-                                  _isEditMode
-                                      ? Icons.save_rounded
-                                      : Icons.add_circle_outline_rounded,
-                                  size: 20,
-                                ),
-                          label: Text(
-                            _isSubmitting
-                                ? (_isEditMode ? 'Saving...' : 'Adding...')
-                                : (_isEditMode
-                                    ? 'Save Changes'
-                                    : 'Add Course'),
-                          ),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _isSubmitting,
+                          builder: (context, isSubmitting, _) {
+                            return ElevatedButton.icon(
+                              onPressed: isSubmitting ? null : _submit,
+                              icon: isSubmitting
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Icon(
+                                      _isEditMode
+                                          ? Icons.save_rounded
+                                          : Icons.add_circle_outline_rounded,
+                                      size: 20,
+                                    ),
+                              label: Text(
+                                isSubmitting
+                                    ? (_isEditMode ? 'Saving...' : 'Adding...')
+                                    : (_isEditMode
+                                        ? 'Save Changes'
+                                        : 'Add Course'),
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 12),
 
                         // Cancel button
-                        OutlinedButton(
-                          onPressed:
-                              _isSubmitting ? null : () => Navigator.of(context).pop(),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 54),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16)),
-                            side: const BorderSide(
-                                color: AppTheme.divider, width: 1.5),
-                            foregroundColor: AppTheme.textMedium,
-                          ),
-                          child: const Text('Cancel',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w600)),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _isSubmitting,
+                          builder: (context, isSubmitting, _) {
+                            return OutlinedButton(
+                              onPressed: isSubmitting
+                                  ? null
+                                  : () => Navigator.of(context).pop(),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 54),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16)),
+                                side: const BorderSide(
+                                    color: AppTheme.divider, width: 1.5),
+                                foregroundColor: AppTheme.textMedium,
+                              ),
+                              child: const Text('Cancel',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600)),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -422,13 +430,18 @@ class _CourseFormScreenState extends State<CourseFormScreen> {
           ),
 
           // Full-screen loading overlay while submitting
-          if (_isSubmitting)
-            Container(
-              color: Colors.black.withOpacity(0.15),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppTheme.primary),
-              ),
-            ),
+          ValueListenableBuilder<bool>(
+            valueListenable: _isSubmitting,
+            builder: (context, isSubmitting, _) {
+              if (!isSubmitting) return const SizedBox.shrink();
+              return Container(
+                color: Colors.black.withValues(alpha: 0.15),
+                child: const Center(
+                  child: CircularProgressIndicator(color: AppTheme.primary),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

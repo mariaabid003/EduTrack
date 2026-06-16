@@ -17,8 +17,7 @@ class DashboardScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Logout',
           style: TextStyle(
@@ -65,8 +64,7 @@ class DashboardScreen extends StatelessWidget {
     return Consumer<AuthController>(
       builder: (context, controller, _) {
         final user = controller.currentUser;
-        final firstName =
-            user?.fullName.split(' ').first ?? 'Student';
+        final firstName = user?.fullName.split(' ').first ?? 'Student';
         final initials = user != null
             ? user.fullName
                 .split(' ')
@@ -112,7 +110,7 @@ class DashboardScreen extends StatelessWidget {
                               height: 120,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.08),
+                                color: Colors.white.withValues(alpha: 0.08),
                               ),
                             ),
                           ),
@@ -124,7 +122,7 @@ class DashboardScreen extends StatelessWidget {
                               height: 140,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.05),
+                                color: Colors.white.withValues(alpha: 0.05),
                               ),
                             ),
                           ),
@@ -138,10 +136,11 @@ class DashboardScreen extends StatelessWidget {
                                   width: 58,
                                   height: 58,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.25),
+                                    color: Colors.white.withValues(alpha: 0.25),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.5),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.5),
                                       width: 2,
                                     ),
                                   ),
@@ -159,7 +158,8 @@ class DashboardScreen extends StatelessWidget {
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Hello, $firstName! 👋',
@@ -174,7 +174,8 @@ class DashboardScreen extends StatelessWidget {
                                       Text(
                                         user?.email ?? '',
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.75),
+                                          color: Colors.white
+                                              .withValues(alpha: 0.75),
                                           fontSize: 13,
                                         ),
                                         overflow: TextOverflow.ellipsis,
@@ -184,8 +185,10 @@ class DashboardScreen extends StatelessWidget {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 8, vertical: 3),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(8),
+                                          color: Colors.white
+                                              .withValues(alpha: 0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
                                         child: Text(
                                           user?.gender.displayName ?? '',
@@ -201,11 +204,13 @@ class DashboardScreen extends StatelessWidget {
                                 ),
                                 // Logout
                                 IconButton(
-                                  onPressed: () => _handleLogout(context, controller),
+                                  onPressed: () =>
+                                      _handleLogout(context, controller),
                                   icon: Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: const Icon(
@@ -265,7 +270,8 @@ class DashboardScreen extends StatelessWidget {
                   // Subject Cards
                   ...Subject.values.asMap().entries.map(
                         (entry) => TweenAnimationBuilder<double>(
-                          duration: Duration(milliseconds: 400 + (entry.key * 150)),
+                          duration:
+                              Duration(milliseconds: 400 + (entry.key * 150)),
                           tween: Tween(begin: 0.0, end: 1.0),
                           curve: Curves.easeOutCubic,
                           builder: (context, value, child) {
@@ -303,7 +309,8 @@ class DashboardScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF6C63FF).withOpacity(0.35),
+                              color: const Color(0xFF6C63FF)
+                                  .withValues(alpha: 0.35),
                               blurRadius: 16,
                               offset: const Offset(0, 6),
                             ),
@@ -314,7 +321,7 @@ class DashboardScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: const Icon(
@@ -341,7 +348,8 @@ class DashboardScreen extends StatelessWidget {
                                   Text(
                                     'CRUD · JSONPlaceholder REST API',
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.75),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.75),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -351,7 +359,7 @@ class DashboardScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
@@ -433,10 +441,11 @@ class _SubjectCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.primary.withOpacity(0.1), width: 1),
+                border: Border.all(
+                    color: AppTheme.primary.withValues(alpha: 0.1), width: 1),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primary.withOpacity(0.05),
+                    color: AppTheme.primary.withValues(alpha: 0.05),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -450,7 +459,7 @@ class _SubjectCard extends StatelessWidget {
                       width: 52,
                       height: 52,
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.12),
+                        color: color.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Center(
@@ -541,10 +550,10 @@ class _StatCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.primary.withOpacity(0.1)),
+          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.1)),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primary.withOpacity(0.03),
+              color: AppTheme.primary.withValues(alpha: 0.03),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -557,7 +566,7 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textDark,
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
