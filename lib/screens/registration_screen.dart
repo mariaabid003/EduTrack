@@ -105,7 +105,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               controller: _nameController,
                               label: 'Full Name',
                               hint: 'Enter your full name',
-                              prefixIcon: const Icon(Icons.person_outline_rounded),
+                              prefixIcon:
+                                  const Icon(Icons.person_outline_rounded),
                               validator: AppValidators.fullName,
                             ),
                             const SizedBox(height: 14),
@@ -121,7 +122,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                             // Gender Dropdown
                             DropdownButtonFormField<Gender>(
-                              value: controller.selectedGender,
+                              initialValue: controller.selectedGender,
                               decoration: InputDecoration(
                                 labelText: 'Gender',
                                 prefixIcon:
@@ -157,8 +158,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                       ))
                                   .toList(),
                               onChanged: controller.setGender,
-                              validator: (_) =>
-                                  AppValidators.gender(controller.selectedGender?.name),
+                              validator: (_) => AppValidators.gender(
+                                  controller.selectedGender?.name),
                             ),
 
                             const SizedBox(height: 28),
@@ -177,7 +178,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               label: 'Password',
                               hint: 'Min 6 chars, 1 uppercase, 1 special',
                               obscureText: !controller.registerPasswordVisible,
-                              prefixIcon: const Icon(Icons.lock_outline_rounded),
+                              prefixIcon:
+                                  const Icon(Icons.lock_outline_rounded),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   controller.registerPasswordVisible
@@ -240,8 +242,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () => Navigator.of(context)
-                                      .pushReplacement(
+                                  onTap: () =>
+                                      Navigator.of(context).pushReplacement(
                                     MaterialPageRoute(
                                         builder: (_) => const LoginScreen()),
                                   ),
@@ -293,10 +295,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withOpacity(0.05),
+        color: AppTheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.primary.withOpacity(0.2),
+          color: AppTheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),

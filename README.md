@@ -1,14 +1,33 @@
-# EduTrack — Flutter Multi-Screen App
+# EduTrack
 
-A complete Flutter multi-screen application featuring user authentication, form validation, and navigation.
+EduTrack is a Flutter multi-screen course app with authentication, CRUD API integration, offline course caching, Provider state management, and a repository-based architecture.
+
+## Branch Name
+
+```text
+feature/offline-cache-and-state-manangement
+```
+
+## Tools And Packages Used
+
+| Package | Purpose |
+| --- | --- |
+| `provider` | App state management using `ChangeNotifier` controllers |
+| `shared_preferences` | Persistent local cache for auth data and offline course data |
+| `http` | REST API calls to JSONPlaceholder |
+| `flutter_lints` | Static analysis and lint checks |
 
 ## Features
 
-- **Splash Screen** — Auto-login check with animation
-- **Registration Screen** — Full form with validation
-- **Login Screen** — Email/password with remember me
-- **Dashboard Screen** — User profile + subject list
-- **Detail Screen** — Subject info, schedule, description
+- Splash screen with remember-me auto login
+- Registration and login with validation
+- Dashboard with subject cards and course navigation
+- Course CRUD using JSONPlaceholder `/posts`
+- Offline course persistence with local cache fallback
+- Pull-to-refresh for API re-sync
+- Search/filter by course title or description
+- Loading, success, empty, error, and offline states
+- Optimistic update/delete with rollback on API failure
 
 ## Frontend
 
@@ -25,63 +44,69 @@ A complete Flutter multi-screen application featuring user authentication, form 
 
 ## Architecture
 
+The course feature follows the required layered structure:
+
+```text
+UI -> State Management -> Repository -> API Service -> Local Database
 ```
+
+Project structure:
+
+```text
 lib/
-├── main.dart                        # App entry point
-├── enums/
-│   └── app_enums.dart               # Gender, AuthState, Subject, PasswordVisibility
-├── models/
-│   └── user_model.dart              # UserModel with toMap/fromMap
-├── validators/
-│   └── app_validators.dart          # Reusable validator class (static methods)
-├── controllers/
-│   └── auth_controller.dart         # Business logic, SharedPreferences, state mgmt
-├── widgets/
-│   ├── app_theme.dart               # Centralized theme & colors
-│   └── common_widgets.dart          # Reusable UI components
-└── screens/
-    ├── splash_screen.dart           # Animated splash + auto-login
-    ├── registration_screen.dart     # Register form
-    ├── login_screen.dart            # Login form
-    ├── dashboard_screen.dart        # Subject list dashboard
-    └── detail_screen.dart           # Subject detail view
+  main.dart                         # App startup and dependency injection
+  models/
+    course_model.dart               # CourseModel and CourseState enum
+  services/
+    course_service.dart             # HTTP-only API layer
+  data/
+    course_local_storage.dart       # SharedPreferences local cache
+  repositories/
+    course_repository.dart          # API/cache decision and sync logic
+  controllers/
+    course_controller.dart          # Provider state and UI intents
+  screens/
+    courses_screen.dart             # Course list, search, refresh, offline UI
+    course_form_screen.dart         # Add/edit course form
 ```
 
-## Getting Started
+## Offline And State Management Approach
 
-### Prerequisites
-- Flutter SDK >= 3.0.0
-- Android Studio / VS Code with Flutter plugin
-- Android emulator or physical device
+`CourseService` only performs HTTP requests. `CourseLocalStorage` only reads and writes local data. `CourseRepository` is the single source of truth: it fetches from the API when possible, saves successful API results locally, and falls back to cached data when the API is unavailable.
 
-### Installation
+Because JSONPlaceholder accepts create/update/delete requests but does not persist them on the server, the repository also stores locally changed and deleted course IDs. On the next refresh, fresh API data is merged with accepted local changes so added, edited, and deleted courses do not disappear.
 
-1. Open Android Studio → **Open an existing project**
-2. Navigate to and select this `flutter_multi_screen_app` folder
-3. Wait for Gradle sync to complete
-4. Run `flutter pub get` in the terminal (or Android Studio will do it automatically)
-5. Run the app with `flutter run`
+`CourseController` uses Provider/`ChangeNotifier` to expose loading, success, empty, failure, search, and offline state to the UI. Course screens call controller methods instead of calling the API or local storage directly.
 
-### Dependencies
-- `provider: ^6.1.1` — State management
-- `shared_preferences: ^2.2.2` — Persistent storage for Remember Me
+## Optimistic UI Updates
 
-## Validation Rules
+- Update: the edited course is shown immediately. If the API request fails, the controller restores the previous course.
+- Delete: the course card is removed immediately. If the API request fails, the controller restores the previous list.
 
-| Field          | Rules |
-|----------------|-------|
-| Full Name      | Required, min 2 chars, letters/spaces only |
-| Email          | Required, valid email format |
-| Gender         | Required selection |
-| Password       | Required, min 6 chars, 1 uppercase, 1 special char |
-| Confirm Password | Required, must match password |
-| Login Email    | Required, valid email format |
-| Login Password | Required |
+## Screenshots
 
-## Key Design Decisions
+Add final submission screenshots in a `screenshots/` folder using these names:
 
-- **`AppValidators`** is a utility class with only static methods — validation logic is fully separated from UI
-- **`AuthController`** extends `ChangeNotifier` (Provider) — all business logic and state in one place
-- **Enums** used for `Gender`, `AuthState`, `Subject` — type-safe categorical data
-- **`SharedPreferences`** stores registered users and remember-me session
-- All widgets use named constructors and `const` where possible for performance
+| Screen | File |
+| --- | --- |
+| Course list online | `screenshots/courses_online.png` |
+| Offline cached data banner | `screenshots/offline_banner.png` |
+| Search/filter | `screenshots/search.png` |
+| Empty state | `screenshots/empty_state.png` |
+
+## How To Run
+
+```bash
+flutter pub get
+flutter run
+```
+
+To test offline mode, open the course screen once with internet access so data is cached. Then disable the internet connection and pull to refresh. The app will show cached courses with the offline banner.
+
+## Verification
+
+```bash
+flutter analyze
+flutter test
+flutter build apk --debug
+```
