@@ -1,58 +1,110 @@
 // lib/controllers/course_controller.dart
 //
-// State management for all CRUD operations on courses.
-// Delegates every network call to CourseService (clean architecture).
+// STATE MANAGEMENT (Provider / ChangeNotifier).
+//
+// Holds ONLY UI state and orchestrates calls to the repository. It contains
+// no networking and no persistence logic — that lives in the service and
+// local-storage layers behind the repository. This keeps UI logic cleanly
+// separated from business logic.
+//
+//   UI  →  CourseController (this)  →  CourseRepository  →  API / LocalDB
+//
+// Manages five UI states: loading, success, empty, failure, plus an
+// `isOffline` flag for when data is served from the on-device cache.
 
 import 'package:flutter/foundation.dart';
 import '../models/course_model.dart';
-import '../services/course_service.dart';
+import '../repositories/course_repository.dart';
+import '../services/course_service.dart' show CourseServiceException;
 
 class CourseController extends ChangeNotifier {
-  final CourseService _service = CourseService();
+  final CourseRepository _repository;
+
+  CourseController(this._repository);
 
   // ─── State ───
   List<CourseModel> _courses = [];
   CourseState _state = CourseState.idle;
   String? _errorMessage;
+  String _searchQuery = '';
+  bool _isOffline = false;
+  DateTime? _lastSyncedAt;
 
   // ─── Getters ───
-  List<CourseModel> get courses => List.unmodifiable(_courses);
+  /// Full list (unfiltered). UI normally reads [courses] (filtered).
+  List<CourseModel> get allCourses => List.unmodifiable(_courses);
+
+  /// The list the UI renders — respects the active search query.
+  List<CourseModel> get courses {
+    if (_searchQuery.isEmpty) return List.unmodifiable(_courses);
+    final q = _searchQuery.toLowerCase();
+    return List.unmodifiable(
+      _courses.where(
+        (c) =>
+            c.title.toLowerCase().contains(q) ||
+            c.body.toLowerCase().contains(q),
+      ),
+    );
+  }
+
   CourseState get state => _state;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _state == CourseState.loading;
+  String get searchQuery => _searchQuery;
 
-  // ─────────────────── READ ───────────────────
+  /// True when the currently-shown data came from the local cache.
+  bool get isOffline => _isOffline;
+  DateTime? get lastSyncedAt => _lastSyncedAt;
 
-  /// Loads all courses from JSONPlaceholder. Safe to call on refresh.
+  /// True when a search yields no matches even though courses exist.
+  bool get isSearchEmpty =>
+      _searchQuery.isNotEmpty && courses.isEmpty && _courses.isNotEmpty;
+
+  // ─────────────────── SEARCH / FILTER ───────────────────
+
+  void search(String query) {
+    _searchQuery = query.trim();
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    if (_searchQuery.isEmpty) return;
+    _searchQuery = '';
+    notifyListeners();
+  }
+
+  // ─────────────────── READ (offline-first) ───────────────────
+
+  /// Loads courses via the repository. Network is preferred; on failure the
+  /// repository falls back to cached data and we flag the session offline.
   Future<void> loadCourses() async {
     _setState(CourseState.loading);
     _errorMessage = null;
 
     try {
-      _courses = await _service.fetchCourses();
-      _setState(CourseState.success);
+      final result = await _repository.getCourses();
+      _courses = result.courses;
+      _isOffline = result.isFromCache;
+      _lastSyncedAt = result.lastSyncedAt;
+      _setState(_courses.isEmpty ? CourseState.empty : CourseState.success);
     } catch (e) {
       _errorMessage = _friendlyError(e);
+      _isOffline = true;
       _setState(CourseState.failure);
     }
   }
 
   // ─────────────────── CREATE ───────────────────
 
-  /// Adds a new course via POST and inserts it at the top of the list.
   Future<bool> addCourse({
     required String title,
     required String body,
   }) async {
-    _setState(CourseState.loading);
     _errorMessage = null;
-
     try {
-      final created = await _service.addCourse(title: title, body: body);
-      // JSONPlaceholder always returns id=101; prepend with a unique
-      // timestamp-derived id so it renders distinctly in the list.
-      final localId = DateTime.now().millisecondsSinceEpoch % 100000;
-      _courses.insert(0, created.copyWith(id: localId));
+      final created = await _repository.addCourse(title: title, body: body);
+      _courses.insert(0, created);
+      _isOffline = false;
       _setState(CourseState.success);
       return true;
     } catch (e) {
@@ -62,46 +114,52 @@ class CourseController extends ChangeNotifier {
     }
   }
 
-  // ─────────────────── UPDATE ───────────────────
+  // ─────────────────── UPDATE (optimistic) ───────────────────
 
-  /// Sends a PUT request and replaces the matching item in the local list.
+  /// Optimistically replaces the item in the list, then calls the API.
+  /// Rolls back to the previous value if the request fails.
   Future<bool> updateCourse(CourseModel course) async {
-    _setState(CourseState.loading);
-    _errorMessage = null;
+    final idx = _courses.indexWhere((c) => c.id == course.id);
+    if (idx == -1) return false;
+
+    final previous = _courses[idx];
+    // Optimistic update — UI reflects the change immediately.
+    _courses[idx] = course;
+    notifyListeners();
 
     try {
-      final updated = await _service.updateCourse(course);
-      final idx = _courses.indexWhere((c) => c.id == course.id);
-      if (idx != -1) {
-        _courses[idx] = updated.copyWith(id: course.id);
-      }
-      _setState(CourseState.success);
+      final saved = await _repository.updateCourse(course);
+      _courses[idx] = saved;
+      notifyListeners();
       return true;
     } catch (e) {
+      // Rollback.
+      _courses[idx] = previous;
       _errorMessage = _friendlyError(e);
-      _setState(CourseState.failure);
+      notifyListeners();
       return false;
     }
   }
 
-  // ─────────────────── DELETE ───────────────────
+  // ─────────────────── DELETE (optimistic) ───────────────────
 
-  /// Optimistically removes the item then sends DELETE. Rolls back on error.
+  /// Optimistically removes the item then calls the API. Rolls back on error.
   Future<bool> deleteCourse(int id) async {
     final backup = List<CourseModel>.from(_courses);
     final idx = _courses.indexWhere((c) => c.id == id);
     if (idx != -1) _courses.removeAt(idx);
+    // Re-evaluate empty state after an optimistic removal.
+    _state = _courses.isEmpty ? CourseState.empty : CourseState.success;
     notifyListeners();
 
     try {
-      await _service.deleteCourse(id);
-      _setState(CourseState.success);
+      await _repository.deleteCourse(id);
       return true;
     } catch (e) {
-      // Rollback
+      // Rollback.
       _courses = backup;
       _errorMessage = _friendlyError(e);
-      _setState(CourseState.failure);
+      _setState(CourseState.success);
       return false;
     }
   }

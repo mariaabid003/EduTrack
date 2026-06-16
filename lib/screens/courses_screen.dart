@@ -18,6 +18,8 @@ class CoursesScreen extends StatefulWidget {
 }
 
 class _CoursesScreenState extends State<CoursesScreen> {
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +29,22 @@ class _CoursesScreenState extends State<CoursesScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _refresh() => context.read<CourseController>().loadCourses();
+
+  /// Human-friendly "x minutes ago" for the last cache sync time.
+  String _timeAgo(DateTime time) {
+    final diff = DateTime.now().difference(time);
+    if (diff.inMinutes < 1) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
+    if (diff.inHours < 24) return '${diff.inHours} h ago';
+    return '${diff.inDays} d ago';
+  }
 
   Future<void> _openAddForm() async {
     await Navigator.of(context).push<bool>(
@@ -242,6 +259,93 @@ class _CoursesScreenState extends State<CoursesScreen> {
               ),
             ),
 
+            // ── Search bar ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (v) {
+                  context.read<CourseController>().search(v);
+                  setState(() {}); // refresh clear-icon visibility
+                },
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: 'Search courses by title or description...',
+                  prefixIcon: const Icon(Icons.search_rounded,
+                      color: AppTheme.textMedium),
+                  suffixIcon: _searchController.text.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.close_rounded,
+                              color: AppTheme.textMedium),
+                          onPressed: () {
+                            _searchController.clear();
+                            context.read<CourseController>().clearSearch();
+                            FocusScope.of(context).unfocus();
+                          },
+                        ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide:
+                        const BorderSide(color: AppTheme.divider),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide:
+                        const BorderSide(color: AppTheme.divider),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide:
+                        const BorderSide(color: AppTheme.primary, width: 1.5),
+                  ),
+                ),
+              ),
+            ),
+
+            // ── Offline / cached-data banner ──
+            Consumer<CourseController>(
+              builder: (context, controller, _) {
+                if (!controller.isOffline) return const SizedBox.shrink();
+                final synced = controller.lastSyncedAt;
+                final hint = synced == null
+                    ? 'Showing saved data'
+                    : 'Offline · showing data saved ${_timeAgo(synced)}';
+                return Container(
+                  margin: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.warning.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border:
+                        Border.all(color: AppTheme.warning.withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.cloud_off_rounded,
+                          color: AppTheme.warning, size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          hint,
+                          style: const TextStyle(
+                            color: AppTheme.textDark,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
             // ── Body ──
             Expanded(
               child: Consumer<CourseController>(
@@ -321,6 +425,49 @@ class _CoursesScreenState extends State<CoursesScreen> {
                           ],
                         ),
                       ),
+                    );
+                  }
+
+                  // ── Empty state (loaded, but no courses at all) ──
+                  if (controller.state == CourseState.empty) {
+                    return RefreshIndicator(
+                      onRefresh: _refresh,
+                      color: AppTheme.primary,
+                      child: ListView(
+                        children: [
+                          SizedBox(
+                            height:
+                                MediaQuery.of(context).size.height * 0.55,
+                            child: _EmptyState(
+                              icon: Icons.inbox_rounded,
+                              title: 'No courses yet',
+                              message:
+                                  'Pull down to refresh, or tap "Add Course" '
+                                  'to create your first one.',
+                              actionLabel: 'Add Course',
+                              onAction: _openAddForm,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // ── Search returned no matches ──
+                  if (controller.isSearchEmpty) {
+                    return ListView(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.55,
+                          child: _EmptyState(
+                            icon: Icons.search_off_rounded,
+                            title: 'No matches',
+                            message:
+                                'No courses match "${controller.searchQuery}". '
+                                'Try a different search.',
+                          ),
+                        ),
+                      ],
                     );
                   }
 
@@ -677,6 +824,76 @@ class _StatPill extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Empty / no-results state ─────────────────────────────────────────────────
+
+class _EmptyState extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  const _EmptyState({
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppTheme.primary, size: 40),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              style: const TextStyle(
+                color: AppTheme.textDark,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppTheme.textMedium,
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: onAction,
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: Text(actionLabel!),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(160, 48),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

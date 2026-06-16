@@ -60,4 +60,5 @@ class CourseModel {
 }
 
 /// Possible states for any course-related async operation.
-enum CourseState { idle, loading, success, failure }
+/// `empty` is emitted when a load succeeds but yields no courses.
+enum CourseState { idle, loading, success, failure, empty }
